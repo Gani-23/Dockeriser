@@ -1,0 +1,62 @@
+version : "4.0"
+
+services:
+  database:
+    mem_limit: 2048m
+    container_name: WP-Database
+    image: mysql:9.0.0
+    restart: always
+    ports:
+      - 3306:3306
+    env_file: .env
+    environment:
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
+      MYSQL_DATABASE: '${MYSQL_DATABASE}'
+      MYSQL_USER: '${MYSQL_USER}'
+      MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - wordpress-network
+
+
+  phpmyadmin:
+    depends_on:
+      - database
+    container_name: WP-PHPMYADMIN
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - 8081:80
+    env_file: .env
+    environment:
+      PMA_HOST: database
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
+    networks: 
+      - wordpress-network
+    
+  wordpress:
+    depends_on:
+      - database
+    container_name: Verizon-WP
+    ports:
+      - 8080:80
+    image: wordpress:6.5.5-php8.1-apache
+    restart: always
+    env_file: .env
+    environment:
+      WORDPRESS_DB_HOST: database:3306
+      WORDPRESS_DB_USER: '${MYSQL_USER}'
+      WORDPRESS_DB_PASSWORD: '${MYSQL_PASSWORD}'
+      WORDPRESS_DB_NAME: '${MYSQL_DATABASE}'
+    networks:
+      - wordpress-network
+    volumes:
+      - ./:/var/www/html
+
+volumes:
+  db_data:
+
+networks:
+  wordpress-network:
+    driver: bridge

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  authservice:
+    build:
+      context: ./backend/authService
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+
+  streamingservice:
+    build:
+      context: ./backend/streamingService
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - authservice
+      - streamingservice
+
